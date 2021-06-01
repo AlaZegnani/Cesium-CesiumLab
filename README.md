@@ -1,55 +1,183 @@
-# cesium-workshop
+# Cesium & CesiumLab
+![img.png](./MarkdownAssets/Background.png)
 
-<p align="center">
-    <a href="http://cesiumjs.org/">
-        <img src="https://github.com/AnalyticalGraphicsInc/cesium/wiki/logos/Cesium_Logo_Color.jpg" width="50%" />
-    </a>
-</p>
+CesiumJS is a JavaScript library for creating 3D globes and 2D maps in a web browser without a plugin.
 
-A simple JavaScript app showcasing some features of [Cesium](http://cesium.com/cesiumjs), the open-source WebGL virtual globe and map engine. Learn more about this code by reading our [associated tutorial](https://cesiumjs.org/tutorials/Cesium-Workshop/).
+Ce tuto utilise CesiumLab a third party software developpé par Beijing West World Technology Co., Ltd. 
+qui fait du traitement de données gratuit spécifiquement conçu pour la plate-forme numérique open source Cesium.
 
-**License**: Apache 2.0.  Free for commercial and non-commercial use.  See [LICENSE.md](LICENSE.md).
+#Aperçu
+Dans ce Didacticiel nous allons créer une application simple pour visualiser la couche bâtiment 3D d'une zone géographique de notre
+choix. Nous allons charger les données 3DTiles et appliquer un style suivant une classification
+par hauteur de bâtiment, type etc…
 
-This application is intended to introduce the main features of Cesium in context, but it is by no means exhaustive. Feel free to fork and modify this example however you'd like.
+![img.png](./MarkdownAssets/apercu.jpg)
 
-Local server
-------------
+#Installation
 
-This app comes with a simple server ([`server.js`](./server.js)), but can be served through any means.
+Quelques étapes de configuration avant de pouvoir passer au développement.
 
-To use the packaged server:
+•Installer [Node.js](https://nodejs.org/en/).
 
-* Install [node.js](http://nodejs.org/)
-* From the `cesium-workshop` root directory, run
+•Installer CesiumLab en cliquant [ici](http://www.cesiumlab.com/app/cesiumlab2_2.3.8.exe) ou en visitant le [site web](http://www.cesiumlab.com/)
+officiel du logiciel.
+
+•Obtenez le code du didacticiel. Clonez ou téléchargez le zip et extraire le contenu.
+
+•Dans votre console, accédez au répertoire du projet cesium-cesiumlab.
+
+•Executez la commande `npm install`.
+
+•Executez la commande `npm start`.
+
+La console doit afficher ce qui suit.
+
+Copier dans le presse-papier.Presse-papiers copiés de données.
+
+`Cesium development server running locally.  Connect to http://localhost:8080`
+
+#Acquisition de données sur les bâtiments urbains
+Les données sur les bâtiments urbains désignent le plan général des bâtiments d'une ville. Elles sont différentes des règles détaillées et des dessins de contrôle d'un bâtiment.
+Il s'agit du plan de tous les bâtiments de la ville. Le plan peut être simplement un rectangle ou un polygone. La zone, qui représente un bâtiment dans cette zone, ne nécessite pas d'informations détaillées.
+
+Pour obtenir les données on va utiliser les données vecteurs gratuits de la couche bâtiment à partir de [OSM-Buildings](https://osmbuildings.org/).
+Naviguer vers votre zone géographique de choix [ici](https://overpass-turbo.eu/) et exporter les données en format
+`.geojson` pour les tuiler ensuite dans CesiumLab.
+
+#Modelisation 3D des données 
+Comme 1ère étape on va convertir les données acquises en shapefile format `.shp` avec CesiumLab de la manière suivante :
+
+(NB qu'il faut d'abord changer la langue en EN en cliquant en bas à droite et créer un compte pour continuer l'utilisation du logiciel)
+
+![](./MarkdownAssets/geotoshp.png)
+#### SHP -> Modélisation 3DTILES
+Avec CesiumLab cette procédure est simple c'est directe en une seule étape mais il y a quelques prérequis.
+
+1. Le format de données SHP est de préférence géoréférncé dans le système de coordonnées WGS84.
+2. Il existe des attributs de hauteur numériques dans le champ d'attribut.
+3. Le codage du fichier est de préférence UTF-8.
+
+![](./MarkdownAssets/3dtiling.png)
+Une fois terminé les fichiers de format suivants sont générés:
+![](./MarkdownAssets/tileset.jpg)
+pour des raisons de limite de taille ces fichiers ne seront pas téléchargés dans cette repo.
+
+# Visualisation 3D de modèles de bâtiments urbains
+
+Les données sont prêtes à être chargé dans Cesium. Nous devons maintenant les mettre dans notre serveur local créé précédemment.
+
+Dans le code on doit ajouter le script suivant:
+````js
+var viewer = new Cesium.Viewer('cesiumContainer', {
+        scene3DOnly: true,
+        selectionIndicator: false,
+        baseLayerPicker: false,
+    });
+    viewer.imageryLayers.remove(viewer.imageryLayers.get(0));
+
+
+    var tileset = new Cesium.Cesium3DTileset({
+        url: "./Source/SampleData/tunistiled3d/tileset.json",
+    });
+    viewer.scene.primitives.add(tileset);
+    viewer.zoomTo(tileset);
+````
+↓
+![](MarkdownAssets/blue.jpg)
+
+Vous pouvez également ajouter une couche imagery avec cesium ion avec la ligne du code suivante :
+
+```js 
+viewer.imageryLayers.addImageryProvider(new Cesium.IonImageryProvider({ assetId: 2 })); 
 ```
-npm install
-npm start
+N'oubliez pas d'ajouter votre token CesiumIon si vous souhaitez ajouter cette étape.(``{ assetId: 2 }`` est la couche imagery de bing maps)
+.
+
+### 3D tiles styiling
+
+Pour le style des bâtiments nous allons faire une classification par hauteur et par type de bâtiment.
+
+le code est le suivant :
+
+```js
+var heightStyle = new Cesium.Cesium3DTileStyle({
+color : {
+conditions : [
+["${height} <= 10 ", "color('yellow',0.6)"],
+["${height} >= 15 && ${height} < 30", "color('green',0.7)"],
+["${height} >= 20 && ${height} < 40", "color('blue',0.8)"],
+["${height} > 30", "color('purple',0.9)"],
+
+                ["true", "color('white')"],
+            ]
+        }
+    });
+    var typeStyle = new Cesium.Cesium3DTileStyle({
+        color : {
+            conditions : [
+                ["${building} === 'university'", "color('green')"],
+                ["${building} === 'office' ", "color('blue')"],
+                ["${building} === 'house' ", "color('lightgreen')"],
+                ["${building} === 'apartements' ", "color('red')"],
+                ["true", "color('white')"],
+            ]
+        },
+        show : true
+    });
+    // Define a white, transparent building style
+    var transparentStyle = new Cesium.Cesium3DTileStyle({
+        color : "color('white')",
+        show : true
+    });
+```
+Et comme dernière étape qui va nous permettre de voir la différence entre les styles dans la même interface c'est d'ajouter des boutons qui vont se charger de cette tâche.
+
+Dans `index.html` ajoutez :
+
+```html
+<div class="backdrop" id="menu">
+            <h2>Tunis-Tunisia</h2>
+            <span><strong>Type de classification</strong></span>
+            <div class="nowrap">
+                <input id="normalMode" name="source" type="radio" checked/>
+                <label for="normalMode">mode simple </label>
+            </div>
+            <div class="nowrap">
+                <input id="heightMode" name="source" type="radio" />
+                <label for="heightMode">height classification</label>
+            </div>
+            <div class="nowrap">
+                <input id="buildMode" name="source" type="radio"/>
+                <label for="buildMode">building classification</label>
+            </div>
+
+
+        </div>
 ```
 
-Browse to `http://localhost:8080/`
+Ajoutez maintenant la partie script dans ``App.js``
 
->Have python installed?  If so, from the `cesium-workshop` root directory run
->```
->python -m SimpleHTTPServer 8080
->```
->(Starting with Python 3, use `python -m http.server 8080`).
->
->Browse to `http://localhost:8080/`
+```js
+var topModeElement = document.getElementById('heightMode');
+    var buildModeElement = document.getElementById('buildMode');
+    var normalModeElement = document.getElementById('normalMode');
 
-What's here?
-------------
+    // Create a follow camera by tracking the drone entity
+    function setViewMode() {
+        if (topModeElement.checked) {
+            tileset.style = heightStyle;
 
-* [index.html](index.html) - A simple HTML page. Run a local web server, and browse to index.html to run your app, which will show our sample application.
-* [Source](Source/) - Contains [App.js](Source/App.js) which is referenced from index.html.  This is where the app's code goes.
-* [server.js](server.js) - A simple node.js server for serving your Cesium app.  See the **Local server** section.
-* [package.json](package.json) - Dependencies for the node.js server.
-* [LICENSE](LICENSE.md) - A license file already referencing Cesium as a third-party.  This starter app is licensed with [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) (free for commercial and non-commercial use).  You can, of course, license your code however you want.
-* [.gitignore](.gitignore) - A small list of files not to include in the git repo.  Add to this as needed.
+        }else if(buildModeElement.checked) {
+            tileset.style = typeStyle;
+        }
+        else {
+            tileset.style = transparentStyle;
+        }
+    }
+    topModeElement.addEventListener('change', setViewMode);
+    buildModeElement.addEventListener('change', setViewMode);
+    normalModeElement.addEventListener('change', setViewMode);
+   ```
+###<p align="center"> ⬇  </p>
 
-Cesium resources
-----------------
-
-* [Reference Documentation](https://cesium.com/docs/cesiumjs-ref-doc/) : A complete guide to the Cesium API containing many code snippets.
-* [Sandcastle](https://sandcastle.cesium.com/) : A live-coding environment with a large gallery of code examples.
-* [Tutorials](https://cesium.com/docs/) : Detailed introductions to areas of Cesium development.
-* [Cesium Forum](https://groups.google.com/forum/?hl=en#!forum/cesium-dev) : A resource for asking and answering Cesium-related questions.
+![](MarkdownAssets/final.jpg)
