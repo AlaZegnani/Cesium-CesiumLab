@@ -4,7 +4,7 @@
 CesiumJS est une bibliothèque JavaScript permettant de créer des globes 3D et des cartes 2D dans un navigateur web sans plugin.
 
 
-Ce tuto utilise CesiumLab a third party software developpé par Beijing West World Technology Co., Ltd. 
+Ce tuto utilise CesiumLab un logiciel tiers developpé par Beijing West World Technology Co., Ltd. 
 qui fait du traitement de données gratuit spécifiquement conçu pour la plate-forme numérique open source Cesium.
 
 # Aperçu
