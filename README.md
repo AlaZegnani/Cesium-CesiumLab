@@ -47,7 +47,7 @@ Pour obtenir les données on va utiliser les données vecteurs gratuits de la co
 Naviguer vers votre zone géographique de choix [ici](https://overpass-turbo.eu/) et exporter les données en format
 `.geojson` pour les tuiler ensuite dans CesiumLab.
 
-#Modelisation 3D des données 
+# Modelisation 3D des données 
 Comme 1ère étape on va convertir les données acquises en shapefile format `.shp` avec CesiumLab de la manière suivante :
 
 (NB qu'il faut d'abord changer la langue en EN en cliquant en bas à droite et créer un compte pour continuer l'utilisation du logiciel)
