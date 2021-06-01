@@ -1,19 +1,21 @@
 # Cesium & CesiumLab
 ![img.png](./MarkdownAssets/Background.png)
 
-CesiumJS is a JavaScript library for creating 3D globes and 2D maps in a web browser without a plugin.
+CesiumJS est une bibliothèque JavaScript permettant de créer des globes 3D et des cartes 2D dans un navigateur web sans plugin.
+
 
 Ce tuto utilise CesiumLab a third party software developpé par Beijing West World Technology Co., Ltd. 
 qui fait du traitement de données gratuit spécifiquement conçu pour la plate-forme numérique open source Cesium.
 
-#Aperçu
+# Aperçu
+
 Dans ce Didacticiel nous allons créer une application simple pour visualiser la couche bâtiment 3D d'une zone géographique de notre
 choix. Nous allons charger les données 3DTiles et appliquer un style suivant une classification
 par hauteur de bâtiment, type etc…
 
 ![img.png](./MarkdownAssets/apercu.jpg)
 
-#Installation
+# Installation
 
 Quelques étapes de configuration avant de pouvoir passer au développement.
 
@@ -36,7 +38,8 @@ Copier dans le presse-papier.Presse-papiers copiés de données.
 
 `Cesium development server running locally.  Connect to http://localhost:8080`
 
-#Acquisition de données sur les bâtiments urbains
+# Acquisition de données sur les bâtiments urbains
+
 Les données sur les bâtiments urbains désignent le plan général des bâtiments d'une ville. Elles sont différentes des règles détaillées et des dessins de contrôle d'un bâtiment.
 Il s'agit du plan de tous les bâtiments de la ville. Le plan peut être simplement un rectangle ou un polygone. La zone, qui représente un bâtiment dans cette zone, ne nécessite pas d'informations détaillées.
 
@@ -178,6 +181,6 @@ var topModeElement = document.getElementById('heightMode');
     buildModeElement.addEventListener('change', setViewMode);
     normalModeElement.addEventListener('change', setViewMode);
    ```
-###<p align="center"> ⬇  </p>
+<p align="center"> ⬇  </p>
 
 ![](MarkdownAssets/final.jpg)
